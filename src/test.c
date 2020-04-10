@@ -23,7 +23,11 @@ int same_image(image a, image b){
     for(i = 0; i < a.w*a.h*a.c; ++i){
         if(!within_eps(a.data[i], b.data[i])) 
         {
-            printf("The value should be %f, but it is %f! \n", b.data[i], a.data[i]);
+            int x, y, c;
+            c = i / (a.w*a.h);
+            y = (i - (c * (a.w*a.h))) / a.h;
+            x = i - y;
+            printf("The value at (%d, %d, %d) should be %f, but it is %f! \n", x, y, c, b.data[i], a.data[i]);
             return 0;
         }
     }
@@ -181,8 +185,7 @@ void test_highpass_filter(){
     image blur = convolve_image(im, f, 0);
     clamp_image(blur);
 
-    
-    image gt = load_image("figs/dog-highpass.png");
+    image gt = load_image("figs/dog-highpass.png");    
     TEST(same_image(blur, gt));
     free_image(im);
     free_image(f);
