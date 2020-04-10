@@ -5,6 +5,7 @@
 #include "image.h"
 #include "test.h"
 #include "args.h"
+#include <stdio.h>
 
 int tests_total = 0;
 int tests_fail = 0;
@@ -122,6 +123,7 @@ void test_nn_resize()
     image im = load_image("data/dogsmall.jpg");
     image resized = nn_resize(im, im.w*4, im.h*4);
     image gt = load_image("figs/dog4x-nn-for-test.png");
+    
     TEST(same_image(resized, gt));
     free_image(im);
     free_image(resized);
