@@ -19,13 +19,11 @@ void l1_normalize(image im)
         }
     }
 
-    float average = sum / (im.w *im.h * im.c);
-
     for(int c = 0; c < im.c; c++){
         for(int y = 0; y < im.h; y++){
             for(int x = 0; x < im.w; x++){
                 float value = get_pixel(im, x, y, c);
-                set_pixel(im, x, y, c, value / average);
+                set_pixel(im, x, y, c, value / sum);
             }
         }
     }
@@ -179,8 +177,35 @@ image make_emboss_filter()
 
 image make_gaussian_filter(float sigma)
 {
-    // TODO
-    return make_image(1,1,1);
+    int size = sigma * 6;
+    if(size % 2 == 0) size += 1;
+
+    /*
+        a*e^b
+        a = 1/(2*pi*sigma^2)
+        b = -(x^2+y^2)/(2*sigma^2)
+    */ 
+
+   image filter = make_image(size, size, 1);
+
+   float a, b, value, ox, oy;
+
+   for(int y= 0; y < filter.h; y++){
+       for(int x = 0; x < filter.w; x++){
+           ox = x - (size/2);
+           oy = y - (size/2);
+
+           a = 1 / (TWOPI * pow(sigma, 2));
+           b = -1 * ( (pow(ox,2) + pow(oy, 2)) / (2 * pow(sigma, 2)) );
+           value = a * exp(b);
+
+           set_pixel(filter, x, y, 0, value);
+       }
+   }
+
+    l1_normalize(filter);
+
+    return filter;
 }
 
 image add_image(image a, image b)
