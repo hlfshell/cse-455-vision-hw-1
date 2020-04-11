@@ -352,6 +352,28 @@ image *sobel_image(image im)
 
 image colorize_sobel(image im)
 {
-    // TODO
-    return make_image(1,1,1);
+    image result = copy_image(im);
+
+    image *sobel_return = sobel_image(result);
+    image magnitude = sobel_return[0];
+    image direction = sobel_return[1];
+
+    feature_normalize(magnitude);
+    feature_normalize(direction);
+
+    rgb_to_hsv(result);
+
+    //For channels 0, 1 (hue, saturation), we apply the
+    //direction,gradient respectively.
+    for(int y = 0; y < im.h; y++){
+        for(int x = 0; x < im.w; x++){
+            set_pixel(result, x, y, 1, get_pixel(magnitude, x, y, 0));
+            set_pixel(result, x, y, 2, get_pixel(magnitude, x, y, 0));
+            set_pixel(result, x, y, 0, get_pixel(direction, x, y, 0));
+        }
+    }
+
+    hsv_to_rgb(result);
+
+    return result;
 }
