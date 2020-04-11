@@ -256,25 +256,98 @@ image sub_image(image a, image b)
 
 image make_gx_filter()
 {
-    // TODO
-    return make_image(1,1,1);
+    image filter = make_image(3, 3, 1);
+
+    filter.data[0] = -1;
+    filter.data[1] = 0;
+    filter.data[2] = 1;
+
+    filter.data[3] = -2;
+    filter.data[4] = 0;
+    filter.data[5] = 2;
+
+    filter.data[6] = -1;
+    filter.data[7] = 0;
+    filter.data[8] = 1;
+
+    return filter;
 }
 
 image make_gy_filter()
 {
-    // TODO
-    return make_image(1,1,1);
+    image filter = make_image(3, 3, 1);
+
+    filter.data[0] = -1;
+    filter.data[1] = -2;
+    filter.data[2] = -1;
+
+    filter.data[3] = 0;
+    filter.data[4] = 0;
+    filter.data[5] = 0;
+
+    filter.data[6] = 1;
+    filter.data[7] = 2;
+    filter.data[8] = 1;
+
+    return filter;
 }
 
 void feature_normalize(image im)
 {
-    // TODO
+    float min, max;
+
+    min = im.data[0];
+    max = im.data[0];
+
+    for(int i = 0; i < im.w * im.h * im.c; i++){
+        if(im.data[i] < min){
+            min = im.data[i];
+        } else if(im.data[i] > max){
+            max = im.data[i];
+        }
+    }
+    
+    for(int i = 0; i < im.w * im.h * im.c; i++){
+        im.data[i] = (im.data[i] - min) / (max - min);
+    }
 }
 
 image *sobel_image(image im)
 {
-    // TODO
-    return calloc(2, sizeof(image));
+    image sobel_x, sobel_y;
+    sobel_x = make_gx_filter();
+    sobel_y = make_gy_filter();
+
+    image gx, gy;
+    gx = convolve_image(im, sobel_x, 0);
+    gy = convolve_image(im, sobel_y, 0);
+
+
+    image magnitude, direction;
+    magnitude = make_image(im.w, im.h, 1);
+    direction = make_image(im.w, im.h, 1);
+
+    float gxV, gyV, magnitudeValue, directionValue;
+
+    for(int y = 0; y < im.h; y++){
+        for(int x = 0; x < im.w; x++){
+            gxV = get_pixel(gx, x, y, 0);
+            gyV = get_pixel(gy, x, y, 0);
+
+            magnitudeValue = sqrt((gxV * gxV) + (gyV * gyV));
+            directionValue = atan2(gyV, gxV);
+
+            set_pixel(magnitude, x, y, 0, magnitudeValue);
+            set_pixel(direction, x, y, 0, directionValue);
+        }
+    }
+
+    image *result = calloc(2, sizeof(image));
+
+    result[0] = magnitude;
+    result[1] = direction;
+
+    return result;
 }
 
 image colorize_sobel(image im)
